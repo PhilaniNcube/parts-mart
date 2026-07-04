@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useState } from "react";
+import { useActionState, useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -61,7 +61,12 @@ export function ListingForm({
   );
   const isEdit = !!initial?.id;
 
+  const handledState = useRef<ActionResult | null>(null);
+
   useEffect(() => {
+    if (handledState.current === state) return;
+    handledState.current = state;
+
     if (state.ok && state.redirectTo) {
       toast.success(isEdit ? "Listing updated" : "Listing created", isEdit ? "Your changes have been saved." : "Your part is now live in search.");
       router.push(state.redirectTo);
