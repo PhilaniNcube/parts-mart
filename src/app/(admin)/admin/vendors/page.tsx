@@ -1,7 +1,8 @@
 import { Suspense } from "react";
-import { Download, Plus } from "lucide-react";
+import { Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AdminVendors, AdminVendorsSkeleton } from "@/features/admin/components/admin-vendors";
+import { CreateVendorSheet } from "@/features/admin/components/create-vendor-sheet";
 
 export const metadata = { title: "Vendors · PartsMart admin" };
 
@@ -18,9 +19,7 @@ export default function AdminVendorsPage() {
           <Button variant="outline" className="h-11 px-4 rounded-xl font-bold gap-2 text-primary border-primary/20 hover:bg-primary/5">
             <Download className="h-5 w-5" /> Export
           </Button>
-          <Button className="h-11 px-6 rounded-xl font-bold gap-2 shadow-sm pointer-events-none opacity-50">
-            <Plus className="h-5 w-5" /> Add Vendor
-          </Button>
+          <CreateVendorSheet />
         </div>
       </div>
 

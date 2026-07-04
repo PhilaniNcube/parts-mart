@@ -5,8 +5,10 @@ import { randomUUID } from "node:crypto";
 import { db } from "@/db";
 import { make, model, partType, user, listing } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import { z } from "zod";
 import { slugify } from "@/types";
 import { getCurrentSession } from "@/features/auth/auth-queries";
+import { auth } from "@/lib/auth";
 
 export type ActionResult = { ok: true } | { ok: false; error: string };
 
@@ -18,6 +20,46 @@ async function requireAdmin() {
 
 function isUniqueViolation(err: unknown): boolean {
   return err instanceof Error && /UNIQUE constraint/i.test(err.message);
+}
+
+const CreateVendorSchema = z.object({
+  name: z.string().min(1, "Contact name is required."),
+  email: z.string().email("Enter a valid email address."),
+  password: z.string().min(8, "Password must be at least 8 characters."),
+  businessName: z.string().optional(),
+});
+
+export async function createVendorAction(formData: FormData): Promise<ActionResult> {
+  if (!(await requireAdmin())) return { ok: false, error: "Not authorized." };
+
+  const parsed = CreateVendorSchema.safeParse({
+    name: formData.get("name"),
+    email: formData.get("email"),
+    password: formData.get("password"),
+    businessName: formData.get("businessName") || undefined,
+  });
+  if (!parsed.success) return { ok: false, error: parsed.error.issues[0].message };
+
+  const existing = await db.select({ id: user.id }).from(user).where(eq(user.email, parsed.data.email)).limit(1);
+  if (existing.length) return { ok: false, error: "An account with that email already exists." };
+
+  try {
+    await auth.api.signUpEmail({
+      body: {
+        name: parsed.data.name,
+        email: parsed.data.email,
+        password: parsed.data.password,
+        role: "vendor",
+        businessName: parsed.data.businessName ?? null,
+      },
+    });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Failed to create vendor account.";
+    return { ok: false, error: message };
+  }
+
+  revalidatePath("/admin/vendors");
+  return { ok: true };
 }
 
 export async function addMakeAction(formData: FormData): Promise<ActionResult> {
