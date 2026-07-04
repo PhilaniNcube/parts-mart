@@ -1,112 +1,39 @@
-import Link from "next/link";
-import { getCatalogTree } from "@/features/vehicle-catalog/vehicle-catalog-queries";
-import { CatalogManager, type MakeOption } from "@/features/admin/components/catalog-manager";
-import { Button } from "@/components/ui/button";
-import { Trash2, Edit } from "lucide-react";
-import { deleteMakeAction } from "@/features/admin/admin-actions";
-import { asFormAction } from "@/lib/form-action";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
+import { Suspense } from "react";
+import { CatalogStats, CatalogStatsSkeleton } from "@/features/admin/components/catalog-stats";
+import { CatalogManager, CatalogManagerSkeleton } from "@/features/admin/components/catalog-manager";
+import { MakesTable, MakesTableSkeleton } from "@/features/admin/components/makes-table";
 
 export const metadata = { title: "Catalog · PartsMart admin" };
 
-export default async function AdminCatalogMakesPage() {
-  const tree = await getCatalogTree();
-  const makeOptions: MakeOption[] = tree.map((m) => ({ id: m.id, name: m.name, slug: m.slug }));
-  const totalModels = tree.reduce((acc, m) => acc + m.models.length, 0);
-
+export default function AdminCatalogMakesPage() {
   return (
     <div className="flex-1 p-6 md:p-10 max-w-7xl mx-auto w-full">
       {/* Header Section */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
         <div>
           <h1 className="text-4xl font-bold text-foreground mb-2">Vehicle makes</h1>
-          <p className="text-lg text-muted-foreground">Configure and manage automotive manufacturer catalog entries.</p>
+          <p className="text-lg text-muted-foreground">
+            Configure and manage automotive manufacturer catalog entries.
+          </p>
         </div>
       </div>
 
       {/* Bento Grid Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <div className="bg-card border border-border p-6 rounded-xl shadow-sm">
-          <span className="text-muted-foreground text-xs font-bold uppercase tracking-wider block mb-2">Total Makes</span>
-          <span className="text-3xl font-bold text-foreground">{tree.length}</span>
-        </div>
-        <div className="bg-card border border-border p-6 rounded-xl shadow-sm">
-          <span className="text-muted-foreground text-xs font-bold uppercase tracking-wider block mb-2">Top Performer</span>
-          <span className="text-3xl font-bold text-primary">Toyota</span>
-        </div>
-        <div className="bg-card border border-border p-6 rounded-xl shadow-sm">
-          <span className="text-muted-foreground text-xs font-bold uppercase tracking-wider block mb-2">Active Listings</span>
-          <span className="text-3xl font-bold text-foreground">12,490</span>
-        </div>
-        <div className="bg-card border border-border p-6 rounded-xl shadow-sm">
-          <span className="text-muted-foreground text-xs font-bold uppercase tracking-wider block mb-2">Models Synced</span>
-          <span className="text-3xl font-bold text-foreground">{totalModels}</span>
-        </div>
-      </div>
+      <Suspense fallback={<CatalogStatsSkeleton />}>
+        <CatalogStats />
+      </Suspense>
 
+      {/* Catalog Manager (Add Make/Model Forms) */}
       <div className="mb-12">
-        <CatalogManager makes={makeOptions} />
+        <Suspense fallback={<CatalogManagerSkeleton />}>
+          <CatalogManager />
+        </Suspense>
       </div>
 
       {/* Table Container */}
-      <div className="bg-card border border-border rounded-xl overflow-hidden shadow-sm">
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader className="bg-muted/30">
-              <TableRow className="hover:bg-transparent border-b border-border">
-                <TableHead className="font-bold text-xs uppercase tracking-widest text-muted-foreground py-4">Make Name</TableHead>
-                <TableHead className="font-bold text-xs uppercase tracking-widest text-muted-foreground py-4">Slug</TableHead>
-                <TableHead className="font-bold text-xs uppercase tracking-widest text-muted-foreground py-4">Models Count</TableHead>
-                <TableHead className="font-bold text-xs uppercase tracking-widest text-muted-foreground py-4 text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {tree.map((m) => (
-                <TableRow key={m.id} className="hover:bg-muted/30 transition-colors group">
-                  <TableCell className="py-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center font-bold text-primary font-mono text-sm shrink-0">
-                        {m.name.charAt(0).toUpperCase()}
-                      </div>
-                      <span className="font-bold text-foreground text-base">{m.name}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell className="py-4 font-mono text-muted-foreground text-sm">{m.slug}</TableCell>
-                  <TableCell className="py-4">
-                    <Badge variant="secondary" className="font-medium bg-secondary/50 text-secondary-foreground">
-                      {m.models.length} model(s)
-                    </Badge>
-                    {m.models.length > 0 && (
-                      <div className="mt-2 text-xs text-muted-foreground flex flex-wrap gap-1 max-w-[200px]">
-                        {m.models.slice(0, 3).map((md) => (
-                          <span key={md.id}>{md.name}{md.bodyStyle ? ` (${md.bodyStyle})` : ""}</span>
-                        ))}
-                        {m.models.length > 3 && <span>+{m.models.length - 3} more</span>}
-                      </div>
-                    )}
-                  </TableCell>
-                  <TableCell className="py-4 text-right">
-                    <div className="flex items-center justify-end gap-2">
-                      <Link href={`/admin/catalog/makes/${m.id}`}>
-                        <Button variant="ghost" size="icon" aria-label={`Edit make ${m.name}`} className="text-muted-foreground hover:text-foreground">
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                      </Link>
-                      <form action={asFormAction(deleteMakeAction)}>
-                        <input type="hidden" name="id" value={m.id} />
-                        <Button type="submit" variant="ghost" size="icon" aria-label={`Delete make ${m.name}`} className="text-muted-foreground hover:text-destructive hover:bg-destructive/10">
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </form>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-      </div>
+      <Suspense fallback={<MakesTableSkeleton />}>
+        <MakesTable />
+      </Suspense>
     </div>
   );
 }
