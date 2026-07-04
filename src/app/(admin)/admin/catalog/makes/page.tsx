@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { getCatalogTree } from "@/features/vehicle-catalog/vehicle-catalog-queries";
 import { CatalogManager, type MakeOption } from "@/features/admin/components/catalog-manager";
 import { Button } from "@/components/ui/button";
@@ -87,9 +88,11 @@ export default async function AdminCatalogMakesPage() {
                   </TableCell>
                   <TableCell className="py-4 text-right">
                     <div className="flex items-center justify-end gap-2">
-                      <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground pointer-events-none">
-                        <Edit className="h-4 w-4" />
-                      </Button>
+                      <Link href={`/admin/catalog/makes/${m.id}`}>
+                        <Button variant="ghost" size="icon" aria-label={`Edit make ${m.name}`} className="text-muted-foreground hover:text-foreground">
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                      </Link>
                       <form action={asFormAction(deleteMakeAction)}>
                         <input type="hidden" name="id" value={m.id} />
                         <Button type="submit" variant="ghost" size="icon" aria-label={`Delete make ${m.name}`} className="text-muted-foreground hover:text-destructive hover:bg-destructive/10">

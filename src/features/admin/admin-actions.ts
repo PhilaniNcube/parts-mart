@@ -116,6 +116,66 @@ export async function deleteMakeAction(formData: FormData): Promise<ActionResult
   return { ok: true };
 }
 
+export async function updateMakeAction(formData: FormData): Promise<ActionResult> {
+  if (!(await requireAdmin())) return { ok: false, error: "Not authorized." };
+  const id = String(formData.get("id") ?? "");
+  const name = String(formData.get("name") ?? "").trim();
+  const country = String(formData.get("country") ?? "").trim() || null;
+  if (!id || !name) return { ok: false, error: "Make name is required." };
+  try {
+    await db
+      .update(make)
+      .set({ name, slug: slugify(name), country })
+      .where(eq(make.id, id));
+  } catch (err) {
+    return { ok: false, error: isUniqueViolation(err) ? `"${name}" already exists.` : "Failed to update make." };
+  }
+  revalidatePath("/admin/catalog/makes");
+  revalidatePath(`/admin/catalog/makes/${id}`);
+  return { ok: true };
+}
+
+export async function updateModelAction(formData: FormData): Promise<ActionResult> {
+  if (!(await requireAdmin())) return { ok: false, error: "Not authorized." };
+  const id = String(formData.get("id") ?? "");
+  const makeId = String(formData.get("makeId") ?? "");
+  const name = String(formData.get("name") ?? "").trim();
+  const bodyStyle = String(formData.get("bodyStyle") ?? "").trim() || null;
+  if (!id || !makeId || !name) return { ok: false, error: "Model name is required." };
+  try {
+    await db
+      .update(model)
+      .set({ name, slug: slugify(name), bodyStyle })
+      .where(eq(model.id, id));
+  } catch (err) {
+    return { ok: false, error: isUniqueViolation(err) ? `"${name}" already exists for this make.` : "Failed to update model." };
+  }
+  revalidatePath("/admin/catalog/makes");
+  revalidatePath(`/admin/catalog/makes/${makeId}`);
+  return { ok: true };
+}
+
+export async function deleteModelAction(formData: FormData): Promise<ActionResult> {
+  if (!(await requireAdmin())) return { ok: false, error: "Not authorized." };
+  const id = String(formData.get("id") ?? "");
+  const makeId = String(formData.get("makeId") ?? "");
+  if (!id || !makeId) return { ok: false, error: "Missing model." };
+  
+  // Check if listings are using this model
+  const inUse = await db.select({ c: listing.id }).from(listing).where(eq(listing.modelId, id)).limit(1);
+  if (inUse.length) return { ok: false, error: "Cannot delete: listings use this model." };
+  
+  try {
+    await db.delete(model).where(eq(model.id, id));
+  } catch {
+    return { ok: false, error: "Failed to delete model." };
+  }
+  
+  revalidatePath("/admin/catalog/makes");
+  revalidatePath(`/admin/catalog/makes/${makeId}`);
+  return { ok: true };
+}
+
 export async function deletePartTypeAction(formData: FormData): Promise<ActionResult> {
   if (!(await requireAdmin())) return { ok: false, error: "Not authorized." };
   const id = String(formData.get("id") ?? "");
