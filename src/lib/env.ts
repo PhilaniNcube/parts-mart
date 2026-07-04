@@ -16,5 +16,9 @@ export const env = {
   ALERT_FROM_EMAIL: process.env.ALERT_FROM_EMAIL ?? "alerts@example.com",
   CRON_SECRET: process.env.CRON_SECRET ?? "",
   SEED_ADMIN_EMAIL: process.env.SEED_ADMIN_EMAIL ?? "admin@partsmart.test",
-  SEED_ADMIN_PASSWORD: process.env.SEED_ADMIN_PASSWORD ?? "changeme123",
+  R2_ACCOUNT_ID: process.env.R2_ACCOUNT_ID ?? "",
+  R2_ACCESS_KEY_ID: process.env.R2_ACCESS_KEY_ID ?? "",
+  R2_SECRET_ACCESS_KEY: process.env.R2_SECRET_ACCESS_KEY ?? "",
+  R2_BUCKET_NAME: process.env.R2_BUCKET_NAME ?? "",
+  NEXT_PUBLIC_R2_DEV_URL: process.env.NEXT_PUBLIC_R2_DEV_URL ?? "",
 } as const;

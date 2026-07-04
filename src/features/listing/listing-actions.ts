@@ -188,3 +188,38 @@ export async function deleteListingAction(formData: FormData): Promise<ActionRes
   revalidatePath("/search");
   return { ok: true };
 }
+
+import { PutObjectCommand } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { r2Client, R2_BUCKET } from "@/lib/r2";
+import { env } from "@/lib/env";
+
+export async function generateUploadUrlAction(filename: string, contentType: string) {
+  const session = await assertCanWriteListings();
+  if (!session) {
+    throw new Error("Not authorized");
+  }
+
+  // Generate a unique object key
+  const ext = filename.split('.').pop() || 'jpg';
+  const objectKey = `listings/${randomUUID()}.${ext}`;
+
+  const command = new PutObjectCommand({
+    Bucket: R2_BUCKET,
+    Key: objectKey,
+    ContentType: contentType,
+  });
+
+  // URL expires in 5 minutes
+  const uploadUrl = await getSignedUrl(r2Client, command, { expiresIn: 300 });
+
+  // Determine the public URL where the image will be accessible
+  // If we have a NEXT_PUBLIC_R2_DEV_URL, use that. Otherwise, construct one or use a placeholder.
+  const baseUrl = env.NEXT_PUBLIC_R2_DEV_URL;
+  if (!baseUrl) {
+    throw new Error("NEXT_PUBLIC_R2_DEV_URL is not configured.");
+  }
+  const publicUrl = `${baseUrl.replace(/\/$/, '')}/${objectKey}`;
+
+  return { uploadUrl, publicUrl };
+}

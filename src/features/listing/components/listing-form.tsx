@@ -13,6 +13,7 @@ import { toast } from "@/hooks/use-toast";
 import { getYearOptions } from "@/types";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
+import { generateUploadUrlAction } from "../listing-actions";
 
 const ALL = "all";
 const EMPTY_CONDITION = "new";
@@ -75,6 +76,9 @@ export function ListingForm({
   const [models, setModels] = useState<NestedOption[]>([]);
   const isAdmin = !!vendors && vendors.length > 0;
 
+  const [isUploading, setIsUploading] = useState(false);
+  const [imageUrl, setImageUrl] = useState<string>(initial?.imageUrl ?? "");
+
   useEffect(() => {
     if (!initial?.makeId) return;
     void fetch(`/api/catalog/models?makeId=${initial.makeId}`)
@@ -91,6 +95,33 @@ export function ListingForm({
       setModels(m as NestedOption[]);
     } else {
       setModels([]);
+    }
+  }
+
+  async function onFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      setIsUploading(true);
+      const { uploadUrl, publicUrl } = await generateUploadUrlAction(file.name, file.type);
+      
+      const res = await fetch(uploadUrl, {
+        method: "PUT",
+        body: file,
+        headers: { "Content-Type": file.type },
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to upload image to storage");
+      }
+
+      setImageUrl(publicUrl);
+      toast.success("Image uploaded successfully");
+    } catch (err) {
+      toast.error("Upload failed", err instanceof Error ? err.message : "Unknown error");
+    } finally {
+      setIsUploading(false);
     }
   }
 
@@ -248,15 +279,35 @@ export function ListingForm({
           </div>
 
           <div className="space-y-1.5">
-            <Label htmlFor="imageUrl">Image URL (optional)</Label>
-            <Input id="imageUrl" name="imageUrl" type="url" defaultValue={initial?.imageUrl} placeholder="https://…" />
+            <Label htmlFor="imageUpload">Image (optional)</Label>
+            <div className="flex items-center gap-4">
+              {imageUrl && (
+                <div className="relative h-16 w-16 overflow-hidden rounded-md border">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={imageUrl} alt="Preview" className="h-full w-full object-cover" />
+                </div>
+              )}
+              <div className="flex-1">
+                <Input
+                  id="imageUpload"
+                  type="file"
+                  accept="image/*"
+                  onChange={onFileChange}
+                  disabled={isUploading}
+                />
+              </div>
+            </div>
+            {isUploading && <p className="text-xs text-muted-foreground mt-1">Uploading...</p>}
+            <input type="hidden" name="imageUrl" value={imageUrl} />
           </div>
 
           <div className="flex justify-end gap-2">
             <Button asChild variant="ghost">
               <a href={initial?.id ? "/vendor/listings" : "/vendor"}>Cancel</a>
             </Button>
-            <Button type="submit" disabled={pending}>{pending ? "Saving…" : initial?.id ? "Save changes" : "Create listing"}</Button>
+            <Button type="submit" disabled={pending || isUploading}>
+              {pending ? "Saving…" : initial?.id ? "Save changes" : "Create listing"}
+            </Button>
           </div>
         </form>
       </CardContent>
