@@ -17,6 +17,7 @@ export interface SearchHit {
   vendorId: string;
   vendorName: string;
   businessName: string | null;
+  city: string | null;
   partTypeId: string;
   partTypeName: string;
   makeName: string | null;
@@ -54,6 +55,7 @@ export const searchListings = cache(async (filters: SearchFilters): Promise<Sear
       vendorId: listing.vendorId,
       vendorName: user.name,
       businessName: user.businessName,
+      city: user.city,
       partTypeId: listing.partTypeId,
       partTypeName: partType.name,
       makeName: make.name,
@@ -92,6 +94,7 @@ export const getRecentListings = cache(async (limit = 8): Promise<SearchHit[]> =
       vendorId: listing.vendorId,
       vendorName: user.name,
       businessName: user.businessName,
+      city: user.city,
       partTypeId: listing.partTypeId,
       partTypeName: partType.name,
       makeName: make.name,

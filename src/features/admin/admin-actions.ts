@@ -27,6 +27,7 @@ const CreateVendorSchema = z.object({
   email: z.string().email("Enter a valid email address."),
   password: z.string().min(8, "Password must be at least 8 characters."),
   businessName: z.string().optional(),
+  city: z.string().min(1, "City is required."),
 });
 
 export async function createVendorAction(formData: FormData): Promise<ActionResult> {
@@ -37,6 +38,7 @@ export async function createVendorAction(formData: FormData): Promise<ActionResu
     email: formData.get("email"),
     password: formData.get("password"),
     businessName: formData.get("businessName") || undefined,
+    city: formData.get("city") || undefined,
   });
   if (!parsed.success) return { ok: false, error: parsed.error.issues[0].message };
 
@@ -51,6 +53,7 @@ export async function createVendorAction(formData: FormData): Promise<ActionResu
         password: parsed.data.password,
         role: "vendor",
         businessName: parsed.data.businessName ?? null,
+        city: parsed.data.city ?? null,
       },
     });
   } catch (err) {

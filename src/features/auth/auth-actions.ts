@@ -16,6 +16,15 @@ const SignUpSchema = z.object({
   password: z.string().min(8, "Password must be at least 8 characters"),
   role: z.enum(["customer", "vendor"]),
   businessName: z.string().optional(),
+  city: z.string().optional(),
+}).refine((data) => {
+  if (data.role === "vendor" && !data.city) {
+    return false;
+  }
+  return true;
+}, {
+  message: "City is required for vendors",
+  path: ["city"],
 });
 
 export async function signUpAction(formData: FormData): Promise<ActionResult> {
@@ -25,6 +34,7 @@ export async function signUpAction(formData: FormData): Promise<ActionResult> {
     password: formData.get("password"),
     role: formData.get("role"),
     businessName: formData.get("businessName") || undefined,
+    city: formData.get("city") || undefined,
   });
   if (!parsed.success) return { ok: false, error: parsed.error.issues[0].message };
 
@@ -39,6 +49,7 @@ export async function signUpAction(formData: FormData): Promise<ActionResult> {
         password: parsed.data.password,
         role: parsed.data.role,
         businessName: parsed.data.businessName ?? null,
+        city: parsed.data.city ?? null,
       },
     });
   } catch (err) {

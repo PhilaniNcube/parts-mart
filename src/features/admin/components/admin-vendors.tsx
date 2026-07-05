@@ -74,6 +74,7 @@ export async function AdminVendors() {
                 <TableRow className="hover:bg-transparent">
                   <TableHead className="uppercase text-xs tracking-wider py-4">Name</TableHead>
                   <TableHead className="uppercase text-xs tracking-wider py-4">Business Name</TableHead>
+                  <TableHead className="uppercase text-xs tracking-wider py-4">Location</TableHead>
                   <TableHead className="uppercase text-xs tracking-wider py-4">Email</TableHead>
                   <TableHead className="uppercase text-xs tracking-wider py-4 text-center">Listings</TableHead>
                   <TableHead className="uppercase text-xs tracking-wider py-4 text-right">Status Control</TableHead>
@@ -91,6 +92,7 @@ export async function AdminVendors() {
                       </div>
                     </TableCell>
                     <TableCell className="py-4 font-medium text-muted-foreground">{v.businessName ?? "—"}</TableCell>
+                    <TableCell className="py-4 font-medium text-muted-foreground">{v.city ?? "—"}</TableCell>
                     <TableCell className="py-4 text-muted-foreground font-mono text-sm">{v.email}</TableCell>
                     <TableCell className="py-4 text-center">
                       <Badge variant="outline" className="bg-muted/50 font-bold">{v.listingCount}</Badge>

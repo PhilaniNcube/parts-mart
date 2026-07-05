@@ -72,10 +72,16 @@ export function SignUpForm() {
             <p className="text-xs text-muted-foreground">At least 8 characters.</p>
           </div>
           {role === "vendor" && (
-            <div className="space-y-1.5">
-              <Label htmlFor="businessName">Business name</Label>
-              <Input id="businessName" name="businessName" placeholder="Acme Auto Spares" />
-            </div>
+            <>
+              <div className="space-y-1.5">
+                <Label htmlFor="businessName">Business name</Label>
+                <Input id="businessName" name="businessName" placeholder="Acme Auto Spares" />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="city">City <span className="text-destructive">*</span></Label>
+                <Input id="city" name="city" placeholder="e.g. Johannesburg" required={role === "vendor"} />
+              </div>
+            </>
           )}
           <Button type="submit" disabled={pending} className="w-full">{pending ? "Creating…" : "Create account"}</Button>
         </form>

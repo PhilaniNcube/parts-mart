@@ -39,7 +39,10 @@ export function ListingCard({ hit }: { hit: SearchHit }) {
             <span className="text-lg font-semibold">{formatPrice(hit.priceCents)}</span>
             <span className="flex items-center gap-1 text-xs text-muted-foreground">
               <ShoppingCart className="h-3.5 w-3.5" />
-              {hit.businessName ?? hit.vendorName}
+              <span>
+                {hit.businessName ?? hit.vendorName}
+                {hit.city ? ` · ${hit.city}` : ""}
+              </span>
             </span>
           </div>
         </CardContent>

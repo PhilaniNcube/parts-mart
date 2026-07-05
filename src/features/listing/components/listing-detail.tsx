@@ -78,7 +78,7 @@ export async function ListingDetail({ id }: { id: string }) {
             <div>
               <p className="font-bold text-foreground">{listing.businessName ?? listing.vendorName}</p>
               <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
-                Verified Vendor
+                Verified Vendor {listing.city ? `· ${listing.city}` : ""}
               </p>
             </div>
           </div>

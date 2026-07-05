@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { loadEnvConfig } from "@next/env";
 import path from "node:path";
 import { fileURLToPath } from "node:url";

@@ -16,6 +16,7 @@ export const user = sqliteTable("user", {
   role: text("role", { enum: ["customer", "vendor", "admin"] }).notNull().default("customer"),
   status: text("status", { enum: ["active", "suspended"] }).notNull().default("active"),
   businessName: text("business_name"),
+  city: text("city"),
   createdAt: integer("created_at", { mode: "number" }).notNull().$defaultFn(() => Date.now()),
   updatedAt: integer("updated_at", { mode: "number" }).notNull().$defaultFn(() => Date.now()),
 });

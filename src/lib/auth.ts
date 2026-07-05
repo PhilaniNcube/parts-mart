@@ -40,6 +40,11 @@ export const auth = betterAuth({
         required: false,
         input: true,
       },
+      city: {
+        type: "string" as const,
+        required: false,
+        input: true,
+      },
     },
   },
   session: {

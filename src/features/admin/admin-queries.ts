@@ -9,6 +9,7 @@ export interface VendorRow {
   name: string;
   email: string;
   businessName: string | null;
+  city: string | null;
   role: string;
   status: string;
   createdAt: number;
@@ -17,7 +18,7 @@ export interface VendorRow {
 
 export const getAllVendors = cache(async (): Promise<VendorRow[]> => {
   const users = await db
-    .select({ id: user.id, name: user.name, email: user.email, businessName: user.businessName, role: user.role, status: user.status, createdAt: user.createdAt })
+    .select({ id: user.id, name: user.name, email: user.email, businessName: user.businessName, city: user.city, role: user.role, status: user.status, createdAt: user.createdAt })
     .from(user)
     .where(eq(user.role, "vendor"))
     .orderBy(user.createdAt);

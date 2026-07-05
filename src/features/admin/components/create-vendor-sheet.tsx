@@ -120,6 +120,20 @@ export function CreateVendorSheet() {
               />
             </div>
 
+            {/* City */}
+            <div className="space-y-1.5">
+              <Label htmlFor="vendor-city" className="text-sm font-semibold">
+                City <span className="text-destructive">*</span>
+              </Label>
+              <Input
+                id="vendor-city"
+                name="city"
+                placeholder="e.g. Johannesburg"
+                required
+                className="h-10 rounded-lg"
+              />
+            </div>
+
             {/* Email */}
             <div className="space-y-1.5">
               <Label htmlFor="vendor-email" className="text-sm font-semibold">
