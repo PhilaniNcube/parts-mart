@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Building2, LayoutDashboard, Package, Plus, LifeBuoy, Users, ShieldAlert } from "lucide-react";
@@ -8,7 +9,15 @@ import { Badge } from "@/components/ui/badge";
 
 export const metadata = { title: "My account · PartsMart" };
 
-export default async function AccountPage() {
+export default function AccountPage() {
+  return (
+    <Suspense fallback={<AccountPageSkeleton />}>
+      <AccountPageContent />
+    </Suspense>
+  );
+}
+
+async function AccountPageContent() {
   const user = await getCurrentUser();
   if (!user) redirect("/sign-in");
 
@@ -70,6 +79,25 @@ export default async function AccountPage() {
         )}
       </div>
     </>
+  );
+}
+
+function AccountPageSkeleton() {
+  return (
+    <div className="animate-pulse">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <div className="h-8 w-48 bg-muted rounded" />
+          <div className="h-4 w-32 bg-muted rounded mt-2" />
+        </div>
+        <div className="h-6 w-16 bg-muted rounded" />
+      </div>
+      <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="h-32 bg-muted rounded-xl" />
+        <div className="h-32 bg-muted rounded-xl" />
+        <div className="h-32 bg-muted rounded-xl" />
+      </div>
+    </div>
   );
 }
 

@@ -10,7 +10,8 @@ import {
   Settings, 
   LogOut, 
   Bell,
-  ChevronDown
+  ChevronDown,
+  Terminal
 } from "lucide-react";
 import { getCurrentUser } from "@/features/auth/auth-queries";
 import { 
@@ -43,6 +44,7 @@ const links = [
   { href: "/admin/vendors", label: "Vendors", icon: Users },
   { href: "/admin/customers", label: "Customers", icon: Users },
   { href: "/admin/listings", label: "All Listings", icon: Package },
+  { href: "/admin/catalog/rapidapi", label: "API Explorer", icon: Terminal },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {

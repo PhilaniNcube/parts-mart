@@ -24,4 +24,5 @@ export const env = {
   R2_SECRET_ACCESS_KEY: process.env.R2_SECRET_ACCESS_KEY ?? "",
   R2_BUCKET_NAME: process.env.R2_BUCKET_NAME ?? "",
   NEXT_PUBLIC_R2_DEV_URL: process.env.NEXT_PUBLIC_R2_DEV_URL ?? "",
+  RAPIDAPI_KEY: process.env.RAPIDAPI_KEY ?? "",
 } as const;
