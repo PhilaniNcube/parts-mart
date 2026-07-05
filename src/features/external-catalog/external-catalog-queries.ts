@@ -6,7 +6,11 @@ import { env } from "@/lib/env";
  * Low-level utility to perform a signed fetch to the Auto Parts Catalog API on RapidAPI.
  * Responses are cached by Next.js/React cache for performance and to save API quota.
  */
-export const fetchFromExternalCatalog = cache(async (path: string, searchParams?: URLSearchParams) => {
+export const fetchFromExternalCatalog = cache(async (
+  path: string,
+  searchParams?: URLSearchParams,
+  options?: { method?: "GET" | "POST"; body?: unknown }
+) => {
   const apiKey = env.RAPIDAPI_KEY;
   if (!apiKey) {
     throw new Error("RAPIDAPI_KEY environment variable is not configured. Please add it to your .env or .env.local file.");
@@ -17,17 +21,27 @@ export const fetchFromExternalCatalog = cache(async (path: string, searchParams?
   const queryStr = searchParams && searchParams.toString() ? `?${searchParams.toString()}` : "";
   const url = `https://auto-parts-catalog.p.rapidapi.com/${cleanPath}${queryStr}`;
 
-  const response = await fetch(url, {
-    method: "GET",
+  const isPost = options?.method === "POST";
+
+  const fetchOptions: RequestInit = {
+    method: options?.method || "GET",
     headers: {
       "Content-Type": "application/json",
       "x-rapidapi-host": "auto-parts-catalog.p.rapidapi.com",
       "x-rapidapi-key": apiKey,
     },
-    next: {
+  };
+
+  if (isPost && options?.body !== undefined) {
+    fetchOptions.body = JSON.stringify(options.body);
+  } else {
+    // Only cache GET requests
+    fetchOptions.next = {
       revalidate: 3600, // Cache for 1 hour
-    },
-  });
+    };
+  }
+
+  const response = await fetch(url, fetchOptions);
 
   if (!response.ok) {
     let errorMsg = `HTTP Error ${response.status}`;
