@@ -6,11 +6,25 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 loadEnvConfig(path.resolve(__dirname, "../.."));
 
 import { randomUUID } from "node:crypto";
-import { db } from "@/db";
-import { make, model, partType, user, account } from "@/db/schema";
-import { auth } from "@/lib/auth";
 import { eq, and } from "drizzle-orm";
 import { slugify } from "@/types";
+
+let db: any;
+let make: any, model: any, partType: any, user: any, account: any;
+let auth: any;
+
+async function init() {
+  const dbMod = await import("@/db");
+  db = dbMod.db;
+  const schemaMod = await import("@/db/schema");
+  make = schemaMod.make;
+  model = schemaMod.model;
+  partType = schemaMod.partType;
+  user = schemaMod.user;
+  account = schemaMod.account;
+  const authMod = await import("@/lib/auth");
+  auth = authMod.auth;
+}
 
 // ── getOrCreate helpers (dedup, NOCASE-safe) ────────────────────────────────
 
@@ -94,6 +108,7 @@ const SEED_PART_TYPES = [
 // ── run ─────────────────────────────────────────────────────────────────────
 
 async function seed() {
+  await init();
   console.log("→ seeding catalog (makes + models)…");
   for (const [makeName, modelNames] of SA_CATALOG) {
     const makeId = await getOrCreateMake(makeName);
