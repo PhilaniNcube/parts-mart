@@ -11,7 +11,10 @@ export const env = {
   TURSO_AUTH_TOKEN: process.env.TURSO_AUTH_TOKEN ?? "",
   BETTER_AUTH_SECRET: required("BETTER_AUTH_SECRET", "dev-secret-change-me"),
   BETTER_AUTH_URL:
-    process.env.BETTER_AUTH_URL ?? process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000",
+    process.env.BETTER_AUTH_URL ??
+    (process.env.VERCEL_URL
+      ? `https://${process.env.VERCEL_URL}`
+      : process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"),
   RESEND_API_KEY: process.env.RESEND_API_KEY ?? "",
   ALERT_FROM_EMAIL: process.env.ALERT_FROM_EMAIL ?? "alerts@example.com",
   CRON_SECRET: process.env.CRON_SECRET ?? "",
